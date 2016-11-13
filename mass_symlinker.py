@@ -70,7 +70,6 @@ def mass_symlinker_present(data, check_mode):
                     try:
                         os.symlink(absolute_source_filename, absolute_destination_symlink)
                         created_symlinks.append(absolute_destination_symlink)
-                        has_changed = True
                     except OSError:
                         err = get_exception()
                         errors.append('%s: %s' % (absolute_destination_symlink, str(err)))
@@ -105,8 +104,6 @@ def mass_symlinker_absent(data, check_mode):
                 if not check_mode:
                     try:
                         os.remove(absolute_destination_symlink)
-                        deleted_symlinks.append(absolute_destination_symlink)
-                        has_changed = True
                     except OSError:
                         err = get_exception()
                         errors.append('%s: %s' % (absolute_destination_symlink, str(err)))
