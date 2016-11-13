@@ -19,20 +19,22 @@ Place the `mass_symlinker.py` file into your Ansible project's `library/` or the
 Usage
 -----
 
-Create symlinks:
 ```
-mass_symlinker:
-  src: /Users/username/.dotfiles
-  dest: /Users/username
-  state: present
-```
+---
+- hosts: localhost
+  connection: local
 
-Remove symlinks:
-```
-mass_symlinker:
-  src: /Users/username/.dotfiles
-  dest: /Users/username
-  state: absent
+    - name: Create symlinks
+      mass_symlinker:
+        src: /Users/chad/.dotfiles
+        dest: /Users/chad/tmp
+        state: present
+
+    - name: Remove symlinks
+      mass_symlinker:
+        src: /Users/username/.dotfiles
+        dest: /Users/username
+        state: absent
 ```
 
 License
