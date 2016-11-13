@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import fnmatch
 import os
 
 DOCUMENTATION = '''
@@ -54,33 +53,31 @@ def mass_symlinker_present(data, check_mode):
         for directory in dirnames:
             absolute_directory = os.path.join(destination_dir, directory)
             if not os.path.isdir(absolute_directory):
-				if check_mode:
-					has_changed = True
-				else:
-					try:
-						os.mkdir(absolute_directory, 0755)
-						has_changed = True
-					except OSError as exception:
-						e = get_exception()
-						errors.append('%s: %s' % (absolute_directory, str(e)))
+                if not check_mode:
+                    try:
+                        os.mkdir(absolute_directory, 0755)
+                    except OSError:
+                        err = get_exception()
+                        errors.append('%s: %s' % (absolute_directory, str(err)))
+                        continue
+                has_changed = True
 
         for filename in filenames:
             absolute_source_filename = os.path.join(root, filename)
             absolute_destination_symlink = os.path.join(destination_dir, filename)
             if not os.path.exists(absolute_destination_symlink):
-				if check_mode:
-					has_changed = True
-					created_symlinks.append(absolute_destination_symlink)
-				else:
-					try:
-						os.symlink(absolute_source_filename, absolute_destination_symlink)
-						created_symlinks.append(absolute_destination_symlink)
-						has_changed = True
-					except OSError as exception:
-						e = get_exception()
-						errors.append('%s: %s' % (absolute_destination_symlink, str(e)))
+                if not check_mode:
+                    try:
+                        os.symlink(absolute_source_filename, absolute_destination_symlink)
+                        created_symlinks.append(absolute_destination_symlink)
+                        has_changed = True
+                    except OSError:
+                        err = get_exception()
+                        errors.append('%s: %s' % (absolute_destination_symlink, str(err)))
+                has_changed = True
+                created_symlinks.append(absolute_destination_symlink)
 
-	action_key_name = "to_be_created_symlinks" if check_mode else 'created_symlinks'
+    action_key_name = "to_be_created_symlinks" if check_mode else 'created_symlinks'
     results = {
         action_key_name: created_symlinks,
         "errors": errors,
@@ -105,32 +102,29 @@ def mass_symlinker_absent(data, check_mode):
         for filename in filenames:
             absolute_destination_symlink = os.path.join(destination_dir, filename)
             if os.path.exists(absolute_destination_symlink):
-				if check_mode:
-					has_changed = True
-					deleted_symlinks.append(absolute_destination_symlink)
-				else:
-					try:
-						os.remove(absolute_destination_symlink)
-						deleted_symlinks.append(absolute_destination_symlink)
-						has_changed = True
-					except OSError as exception:
-						e = get_exception()
-						errors.append('%s: %s' % (absolute_destination_symlink, str(e)))
+                if not check_mode:
+                    try:
+                        os.remove(absolute_destination_symlink)
+                        deleted_symlinks.append(absolute_destination_symlink)
+                        has_changed = True
+                    except OSError:
+                        err = get_exception()
+                        errors.append('%s: %s' % (absolute_destination_symlink, str(err)))
+                has_changed = True
+                deleted_symlinks.append(absolute_destination_symlink)
 
         for directory in dirnames:
             absolute_directory = os.path.join(destination_dir, directory)
             if os.path.isdir(absolute_directory):
-				if check_mode:
-					has_changed = True
-				else:
-					try:
-						os.rmdir(absolute_directory)
-						has_changed = True
-					except OSError as exception:
-						e = get_exception()
-						errors.append('%s: %s' % (absolute_directory, str(e)))
-	
-	action_key_name = "to_be_deleted_symlinks" if check_mode else 'deleted_symlinks'
+                if not check_mode:
+                    try:
+                        os.rmdir(absolute_directory)
+                    except OSError:
+                        err = get_exception()
+                        errors.append('%s: %s' % (absolute_directory, str(err)))
+                has_changed = True
+
+    action_key_name = "to_be_deleted_symlinks" if check_mode else 'deleted_symlinks'
     results = {
         action_key_name: deleted_symlinks,
         "errors": errors,
@@ -147,19 +141,19 @@ def main():
         "src": {"required": True, "type": "str"},
         "dest": {"required": True, "type": "str"},
         "state": {
-            "default": "present", 
-            "choices": ['present', 'absent'],  
-            "type": 'str' 
+            "default": "present",
+            "choices": ['present', 'absent'],
+            "type": 'str',
         },
     }
     choice_map = {
-      "present": mass_symlinker_present,
-      "absent": mass_symlinker_absent, 
+        "present": mass_symlinker_present,
+        "absent": mass_symlinker_absent,
     }
 
     module = AnsibleModule(
-      argument_spec=fields,
-      supports_check_mode=True
+        argument_spec=fields,
+        supports_check_mode=True
     )
     has_changed, success, result = choice_map.get(module.params['state'])(module.params, module.check_mode)
     if success:
