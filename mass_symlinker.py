@@ -73,6 +73,7 @@ def mass_symlinker_present(data, check_mode):
                     except OSError:
                         err = get_exception()
                         errors.append('%s: %s' % (absolute_destination_symlink, str(err)))
+                        continue
                 has_changed = True
                 created_symlinks.append(absolute_destination_symlink)
 
@@ -107,6 +108,7 @@ def mass_symlinker_absent(data, check_mode):
                     except OSError:
                         err = get_exception()
                         errors.append('%s: %s' % (absolute_destination_symlink, str(err)))
+                        continue
                 has_changed = True
                 deleted_symlinks.append(absolute_destination_symlink)
 
@@ -119,6 +121,7 @@ def mass_symlinker_absent(data, check_mode):
                     except OSError:
                         err = get_exception()
                         errors.append('%s: %s' % (absolute_directory, str(err)))
+                        continue
                 has_changed = True
 
     action_key_name = "to_be_deleted_symlinks" if check_mode else 'deleted_symlinks'
