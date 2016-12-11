@@ -5,6 +5,8 @@ An Ansible module to recursively symlink files from one directory to another.
 
 Originally created so that I could take a directory with all of my dotfiles and symlink to my home directory.
 
+Why not use the the "link" state option in the Ansible `file` module? This would symlink the whole dotfiles directory which may not be ideal as there likely secrets and other configuration in $HOME that should not wind up symlinked in a dotfiles repo. With this module, we will create subdirectories in $HOME to match the dotfiles repo structure and then link the contents from the dotfiles repo into those directories.
+
 Requirements
 ------------
 
